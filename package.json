@@ -1,0 +1,49 @@
+{
+  "name": "dexie-bulksync-addon",
+  "version": "1.0.0",
+  "description": "BulkSync is an addon for the Dexie library. It works like the 'bulkPut' (update and add) but it also deletes.",
+  "scripts": {
+    "test": "jest --runInBand --logHeapUsage --config=./config/jest.config.ts",
+    "clean": "rm -rf ./lib",
+    "build": "yarn clean && yarn build:esm && yarn build:cjs",
+    "build:esm": "tsc -p ./config/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
+    "build:cjs": "tsc -p ./config/tsconfig.cjs.json",
+    "prepack": "yarn build",
+    "play": "TS_NODE_PROJECT=./config/tsconfig.repl.json node --experimental-specifier-resolution=node --loader ts-node/esm ./examples/playground.ts"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "types": "./lib/cjs/types/index.d.ts",
+  "main": "./lib/cjs/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.2.3",
+    "@types/node": "^18.11.9",
+    "fake-indexeddb": "^4.0.1",
+    "jest": "^29.3.1",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.0.3",
+    "ts-jest-resolver": "^2.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4",
+    "dexie": "3.x"
+  },
+  "peerDependencies": {
+    "dexie": "3.x"
+  }
+}
