@@ -10,5 +10,5 @@
     "declarationMap": true,
     "allowSyntheticDefaultImports": true
   },
-  "files": ["../src/DexieAddon.ts", "../src/BulkSync.ts"]
+  "files": ["../src/index.ts"]
 }
