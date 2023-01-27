@@ -3,6 +3,7 @@
   "version": "1.0.5",
   "description": "BulkSync is an addon for the Dexie library. It works like the 'bulkPut' (update and add) but it also deletes.",
   "scripts": {
+    "test": "jest --runInBand --logHeapUsage --config=./config/jest.config.ts",
     "clean": "rm -rf ./lib",
     "build": "yarn clean && yarn build:esm && yarn build:cjs",
     "build:rename-esm": "mv lib/esm/index.js lib/esm/index.mjs",
