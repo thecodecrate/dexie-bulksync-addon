@@ -1,5 +1,5 @@
 import { IndexableType } from "dexie";
-import { Middleware, Request } from "./Middleware";
+import { Middleware, Request } from "./Middleware.js";
 
 export class DeleteMiddleware<TRecordClass> extends Middleware<TRecordClass> {
   public async handle(request: Request<TRecordClass>): Promise<void> {

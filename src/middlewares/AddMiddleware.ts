@@ -1,4 +1,4 @@
-import { Middleware, Request } from "./Middleware";
+import { Middleware, Request } from "./Middleware.js";
 
 export class AddMiddleware<TRecordClass> extends Middleware<TRecordClass> {
   public async handle(request: Request<TRecordClass>): Promise<void> {

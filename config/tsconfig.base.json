@@ -8,9 +8,7 @@
     "allowJs": true,
     "declaration": true,
     "declarationMap": true,
-    "allowSyntheticDefaultImports": true,
-    // "experimentalDecorators": true,
-    // "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true
   },
-  "files": ["../src/classes/**/*.ts"],
+  "files": ["../src/DexieAddon.ts", "../src/BulkSync.ts"]
 }

@@ -1,5 +1,5 @@
-import Dexie, { Table } from "dexie";
-import { BulkSync } from "./BulkSync";
+import { Dexie, Table } from "dexie";
+import { BulkSync } from "./BulkSync.js";
 
 declare module "dexie" {
   interface Collection<T = any, TKey = IndexableType> {

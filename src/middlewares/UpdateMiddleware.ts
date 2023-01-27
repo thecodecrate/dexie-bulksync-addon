@@ -1,5 +1,5 @@
 import { IndexableType } from "dexie";
-import { Middleware, Request } from "./Middleware";
+import { Middleware, Request } from "./Middleware.js";
 
 type KeyChange = {
   keyBefore: IndexableType;

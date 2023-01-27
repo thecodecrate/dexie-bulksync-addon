@@ -1,8 +1,8 @@
 import { Table } from "dexie";
-import { AddMiddleware } from "./middlewares/AddMiddleware";
-import { DeleteMiddleware } from "./middlewares/DeleteMiddleware";
-import { Middleware } from "./middlewares/Middleware";
-import { UpdateMiddleware } from "./middlewares/UpdateMiddleware";
+import { AddMiddleware } from "./middlewares/AddMiddleware.js";
+import { DeleteMiddleware } from "./middlewares/DeleteMiddleware.js";
+import { Middleware } from "./middlewares/Middleware.js";
+import { UpdateMiddleware } from "./middlewares/UpdateMiddleware.js";
 
 export class BulkSync<TRecordClass> {
   public fieldsIsSameRecord: string[] | null = null;

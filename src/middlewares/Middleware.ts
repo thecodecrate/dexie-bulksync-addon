@@ -1,4 +1,4 @@
-import { BulkSync } from "../BulkSync";
+import { BulkSync } from "../BulkSync.js";
 
 export type Request<TRecordClass> = {
   currentRecords: TRecordClass[];

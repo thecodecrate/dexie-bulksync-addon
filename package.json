@@ -1,12 +1,12 @@
 {
   "name": "dexie-bulksync-addon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "BulkSync is an addon for the Dexie library. It works like the 'bulkPut' (update and add) but it also deletes.",
   "scripts": {
-    "test": "jest --runInBand --logHeapUsage --config=./config/jest.config.ts",
     "clean": "rm -rf ./lib",
     "build": "yarn clean && yarn build:esm && yarn build:cjs",
-    "build:esm": "tsc -p ./config/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
+    "build:rename-esm": "mv lib/esm/DexieAddon.js lib/esm/DexieAddon.mjs && mv lib/esm/BulkSync.js lib/esm/BulkSync.mjs",
+    "build:esm": "tsc -p ./config/tsconfig.esm.json && yarn build:rename-esm",
     "build:cjs": "tsc -p ./config/tsconfig.cjs.json",
     "prepack": "yarn build",
     "play": "TS_NODE_PROJECT=./config/tsconfig.repl.json node --experimental-specifier-resolution=node --loader ts-node/esm ./examples/playground.ts"
@@ -14,17 +14,15 @@
   "type": "module",
   "author": "",
   "license": "ISC",
-  "types": "./lib/cjs/types/index.d.ts",
-  "main": "./lib/cjs/index.js",
   "exports": {
-    ".": {
+    "./*": {
       "import": {
-        "types": "./lib/esm/types/index.d.ts",
-        "default": "./lib/esm/index.mjs"
+        "types": "./lib/esm/types/*.d.ts",
+        "default": "./lib/esm/*.mjs"
       },
       "require": {
-        "types": "./lib/cjs/types/index.d.ts",
-        "default": "./lib/cjs/index.js"
+        "types": "./lib/cjs/types/*.d.ts",
+        "default": "./lib/cjs/*.js"
       }
     }
   },
