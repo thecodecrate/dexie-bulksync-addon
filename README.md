@@ -1,9 +1,15 @@
 # BulkSync for Dexie
-BulkSync is an addon for the Dexie library. It's a "bulkPut" (update and add operations) that also deletes.
+
+[![CI Tests](https://github.com/thecodecrate/dexie-bulksync-addon/actions/workflows/tests.yml/badge.svg)](https://github.com/thecodecrate/dexie-bulksync-addon/actions/workflows/tests.yml)
+[![npm version](https://badge.fury.io/js/dexie-bulksync-addon.svg)](https://www.npmjs.com/package/dexie-bulksync-addon)
+
+BulkSync is an addon for the Dexie library. It adds a `bulkSync` method to synchronize two datasets.
+
+You can think of it as an extended version of the "bulkPut" command that also deletes records besides updating and adding records.
 
 ## Features
-- **Add:** Automatically adds new records that are not present in the local database.
-- **Delete:** Automatically deletes records that are not present in the new dataset.
+- **Add:** Automatically adds new records not present in the local database.
+- **Delete:** Automatically deletes records not present in the new dataset.
 - **Update:** Automatically updates records that are present in both the local database and the new dataset.
 - **Smart update**: It only runs the database update command if the values are different, avoiding unnecessary disk writes and potential deadlocks.
 
@@ -70,7 +76,7 @@ await db.books.where({ genre_id: 1 }).bulkSync([
   // delete "The Chronicles of Narnia"
 ]);
 
-// This operation is equivalent to remove all records with "genre_id" 1 and add the new dataset.
+// This operation is equivalent to removing all records with "genre_id" 1 and add the new dataset.
 ```
 
 ## Using with arrays
@@ -95,7 +101,7 @@ await db.books.where({ genre_id: 1 }).bulkSync(newDataSet);
 ```
 
 # Extending BulkSync
-Sometimes, you may want to customize the behavior of bulkSync to better suit your specific use case. The BulkSync library allows you to do this by extending the BulkSync class.
+You can customize the behavior of bulkSync to suit your specific use case better. The BulkSync library allows you to do this by extending the BulkSync class.
 
 Here's an example of how you can create a custom BulkSync class:
 
@@ -137,10 +143,10 @@ const db = new MyDatabase();
 export db;
 ```
 
-In this example, you can see that the custom `MyBulkSync` class is imported and set as the `bulkSyncClass` property in the constructor of the `MyDatabase` class. This means that the `bulkSync` method will use the custom behavior defined in the `MyBulkSync` class when called on any table in the `MyDatabase` class.
+In this example, you can see that the custom `MyBulkSync` class is imported and set as the `bulkSyncClass` property in the constructor of the `MyDatabase` class. The `bulkSync` method will use the custom behavior defined in the `MyBulkSync` class when called on any table in the `MyDatabase` class.
 
 ## Extending BulkSync per-table
-It's also possible to extend the BulkSync class for specific tables, rather than for the entire database. You can do this by creating a custom class and setting it to the `bulkSyncInstances` property of your database, specifying the table name as the key and the custom class as the value.
+It's also possible to extend the BulkSync class for specific tables rather than the entire database. You can create a custom class and assign it to the `db.bulkSyncInstances` property, specifying the table name as the key and the custom class as the value.
 
 ```typescript
 // BookBulkSync.ts
@@ -183,9 +189,9 @@ const db = new MyDatabase();
 # API
 
 ## Comparing records
-By default, BulkSync uses the primary key of the records to determine if two records are the same. However, in certain cases, such as when using composite keys in pivot tables, you may want to use a different set of fields to determine record equality.
+By default, BulkSync uses the primary key of the records to determine if two records are the same. However, in certain cases, such as when using composite keys in pivot tables, you may want to use different fields to determine record equality.
 
-You can customize the fields used for record comparison by defining the `fieldsIsSameRecord` property in a custom BulkSync class. This property should be set to an array of strings representing the field names that should be used to compare records.
+You can customize the fields used for record comparison by defining the `fieldsIsSameRecord` property in a custom BulkSync class. This property should be set to an array of strings representing the field names used to compare records.
 
 ```typescript
 // BookUserBulkSync.ts
@@ -210,7 +216,7 @@ class BookUserBulkSync extends BulkSync<BookUser> {
 ```
 
 ## Smart updates
-By default, BulkSync only updates records in the local database if the contents of the new record are different from the contents of the existing record. To determine if the contents of the record have changed, BulkSync compares every field in the record.
+By default, BulkSync only updates records in the local database if the contents of the new record are different from the contents of the existing record. To determine if the record's contents have changed, BulkSync compares every field in the record.
 
 You can customize the fields that are used for this comparison by defining the `fieldsDataChanged` property in a custom BulkSync class. This property should be set to an array of strings representing the field names that should be used to compare records.
 
@@ -269,9 +275,9 @@ class BookBulkSync extends BulkSync<Book> {
 
 ## Middlewares
 
-Each call to BulkSync executes three actions: adding new records, deleting existing records and updating existing records. To add new actions or to modify the existing ones, you can create and use "middlewares".
+Each call to BulkSync executes three actions: adding new records, deleting existing records, and updating existing records. You can create and use "middlewares" to add new actions or modify existing ones.
 
-A middleware is a class that implements the `handle()` method, which is called by BulkSync during its execution. You can use this method to perform additional actions or to customize the behavior of BulkSync.
+A middleware is a class that implements the `handle()` method, which BulkSync calls during its execution. You can use this method to perform additional actions or to customize the behavior of BulkSync.
 
 ```typescript
 // LogMiddleware.ts
