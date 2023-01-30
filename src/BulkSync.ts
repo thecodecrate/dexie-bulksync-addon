@@ -41,13 +41,13 @@ export class BulkSync<TRecordClass> {
 
   public isSameRecord(recordA: TRecordClass, recordB: TRecordClass): boolean {
     return this.getFieldsIsSameRecord().every(
-      (field) => recordA[field] === recordB[field]
+      (field) => recordA[field] === recordB[field],
     );
   }
 
   public async execute(
     currentRecords: TRecordClass[],
-    newRecords: TRecordClass[]
+    newRecords: TRecordClass[],
   ): Promise<void> {
     for (const middleware of this.middlewares) {
       await middleware.handle({ currentRecords, newRecords });
