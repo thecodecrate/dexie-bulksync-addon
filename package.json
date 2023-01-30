@@ -1,6 +1,6 @@
 {
   "name": "dexie-bulksync-addon",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "BulkSync is an addon for the Dexie library. It works like the 'bulkPut' (update and add) but it also deletes.",
   "scripts": {
     "test": "jest --runInBand --logHeapUsage --config=./config/jest.config.ts",
