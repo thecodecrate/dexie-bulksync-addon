@@ -5,11 +5,11 @@ import { Middleware } from "./middlewares/Middleware.js";
 import { UpdateMiddleware } from "./middlewares/UpdateMiddleware.js";
 
 export class BulkSync<TRecordClass> {
-  public fieldsIsSameRecord: string[] | null = null;
+  public fieldsIsSameRecord?: string[];
 
-  public fieldsDataChanged: string[] | null = null;
+  public fieldsDataChanged?: string[];
 
-  public fieldsToUpdate: string[] | null = null;
+  public fieldsToUpdate?: string[];
 
   public middlewares: Middleware<TRecordClass>[] = [
     new DeleteMiddleware(this),
@@ -25,18 +25,18 @@ export class BulkSync<TRecordClass> {
 
   public getFieldsIsSameRecord(): Array<keyof TRecordClass> {
     return (
-      (this.fieldsIsSameRecord as Array<keyof TRecordClass> | null) ?? [
+      (this.fieldsIsSameRecord as Array<keyof TRecordClass>) ?? [
         this.getPrimaryKeyName(),
       ]
     );
   }
 
   public getFieldsDataChanged(): Array<keyof TRecordClass> | null {
-    return this.fieldsDataChanged as Array<keyof TRecordClass> | null;
+    return this.fieldsDataChanged as Array<keyof TRecordClass>;
   }
 
   public getFieldsToUpdate(): Array<keyof TRecordClass> | null {
-    return this.fieldsToUpdate as Array<keyof TRecordClass> | null;
+    return this.fieldsToUpdate as Array<keyof TRecordClass>;
   }
 
   public isSameRecord(recordA: TRecordClass, recordB: TRecordClass): boolean {
