@@ -1,4 +1,5 @@
-import { Table } from "dexie";
+import { IndexableType, Table } from "dexie";
+import { BulkSyncSettings } from "./BulkSyncSettings.js";
 import { AddMiddleware } from "./middlewares/AddMiddleware.js";
 import { DeleteMiddleware } from "./middlewares/DeleteMiddleware.js";
 import { Middleware } from "./middlewares/Middleware.js";
@@ -19,38 +20,40 @@ export class BulkSync<TRecordClass> {
 
   constructor(public table: Table<TRecordClass>) {}
 
-  public getPrimaryKeyName(): keyof TRecordClass {
-    return this.table.schema.primKey.keyPath as keyof TRecordClass;
+  public getPrimaryKeyName(): string {
+    const fieldName = this.table.schema.primKey.keyPath;
+
+    if (Array.isArray(fieldName)) {
+      throw new Error("Composite primary keys are not supported");
+    }
+
+    if (typeof fieldName !== "string") {
+      throw new Error("Primary key is not a string");
+    }
+
+    return fieldName;
   }
 
-  public getFieldsIsSameRecord(): Array<keyof TRecordClass> {
-    return (
-      (this.fieldsIsSameRecord as Array<keyof TRecordClass>) ?? [
-        this.getPrimaryKeyName(),
-      ]
-    );
-  }
+  public getPrimaryKeyValue(record: TRecordClass): IndexableType {
+    const fieldName = this.getPrimaryKeyName() as keyof TRecordClass;
 
-  public getFieldsDataChanged(): Array<keyof TRecordClass> | null {
-    return this.fieldsDataChanged as Array<keyof TRecordClass>;
-  }
-
-  public getFieldsToUpdate(): Array<keyof TRecordClass> | null {
-    return this.fieldsToUpdate as Array<keyof TRecordClass>;
-  }
-
-  public isSameRecord(recordA: TRecordClass, recordB: TRecordClass): boolean {
-    return this.getFieldsIsSameRecord().every(
-      (field) => recordA[field] === recordB[field],
-    );
+    return record[fieldName] as IndexableType;
   }
 
   public async execute(
     currentRecords: TRecordClass[],
     newRecords: TRecordClass[],
+    overrideSettings?: BulkSyncSettings<TRecordClass>,
   ): Promise<void> {
-    for (const middleware of this.middlewares) {
-      await middleware.handle({ currentRecords, newRecords });
+    const settings = new BulkSyncSettings<TRecordClass>({
+      fieldsIsSameRecord: this.fieldsIsSameRecord ?? [this.getPrimaryKeyName()],
+      fieldsDataChanged: this.fieldsDataChanged,
+      fieldsToUpdate: this.fieldsToUpdate,
+      middlewares: this.middlewares,
+    }).mergeWith(overrideSettings);
+
+    for (const middleware of settings.middlewares ?? []) {
+      await middleware.handle({ currentRecords, newRecords, settings });
     }
   }
 }

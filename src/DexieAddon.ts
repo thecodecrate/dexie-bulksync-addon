@@ -1,5 +1,6 @@
 import { Dexie, Table } from "dexie";
 import { BulkSync } from "./BulkSync.js";
+import { BulkSyncSettings } from "./BulkSyncSettings.js";
 
 declare module "dexie" {
   interface Collection<T = any, TKey = IndexableType> {
@@ -7,11 +8,17 @@ declare module "dexie" {
       table: Table<T>;
     };
 
-    bulkSync(newRecords: T[]): Promise<void>;
+    bulkSync(
+      newRecords: T[],
+      overrideSettings?: BulkSyncSettings<T>,
+    ): Promise<void>;
   }
 
   interface Table<T> {
-    bulkSync(newRecords: T[]): Promise<void>;
+    bulkSync(
+      newRecords: T[],
+      overrideSettings?: BulkSyncSettings<T>,
+    ): Promise<void>;
   }
 
   interface Dexie {
@@ -40,15 +47,21 @@ export function BulkSyncAddon(db: Dexie) {
 
   db.bulkSyncInstances = {};
 
-  db.Collection.prototype.bulkSync = async function <T>(newRecords: T[]) {
+  db.Collection.prototype.bulkSync = async function <T>(
+    newRecords: T[],
+    overrideSettings?: BulkSyncSettings<T>,
+  ) {
     const instance = singletonBulkSync<T>(db, this._ctx.table);
 
-    await instance.execute(await this.toArray(), newRecords);
+    await instance.execute(await this.toArray(), newRecords, overrideSettings);
   };
 
-  db.Table.prototype.bulkSync = async function <T>(newRecords: T[]) {
+  db.Table.prototype.bulkSync = async function <T>(
+    newRecords: T[],
+    overrideSettings?: BulkSyncSettings<T>,
+  ) {
     const instance = singletonBulkSync<T>(db, this);
 
-    await instance.execute(await this.toArray(), newRecords);
+    await instance.execute(await this.toArray(), newRecords, overrideSettings);
   };
 }

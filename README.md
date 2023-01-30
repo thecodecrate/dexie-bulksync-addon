@@ -310,5 +310,27 @@ class MyBulkSync extends BulkSync {
 
 You can use multiple middlewares and order them as per your requirements.
 
+## Overriding via `BulkSyncSettings`
+
+Instead of extending the BulkSync class, you can change the BulkSync behavior via a `BulkSyncSettings` object passed as a second argument to a `bulkSync` call.
+
+It supports these properties:
+- `fieldsIsSameRecord`
+- `fieldsDataChanged`
+- `fieldsToUpdate`
+- `middlewares`
+
+Example:
+
+```typescript
+const overriddenSettings = new BulkSyncSettings({
+  fieldsToUpdate: ["updated_at"],
+});
+
+await db.books
+  .where({ genre_id: 1 })
+  .bulkSync(myUpdatedData, overriddenSettings);
+```
+
 ## Conclusion
 BulkSync for Dexie makes it easy to keep your local IndexedDB data in sync with a remote dataset. Its smart update operation ensures that your database remains efficient, while its simple API makes it easy to integrate into your web application.

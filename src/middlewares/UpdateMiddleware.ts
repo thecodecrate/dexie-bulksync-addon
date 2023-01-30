@@ -1,9 +1,10 @@
 import { IndexableType } from "dexie";
+import { BulkSyncSettings } from "../BulkSyncSettings.js";
 import { Middleware, Request } from "./Middleware.js";
 
 type KeyChange = {
-  keyBefore: IndexableType;
-  keyAfter: IndexableType;
+  keyFrom: IndexableType;
+  keyTo: IndexableType;
 };
 
 export type RecordsToUpdate<TRecordClass> = {
@@ -14,19 +15,18 @@ export type RecordsToUpdate<TRecordClass> = {
 export class UpdateMiddleware<TRecordClass> extends Middleware<TRecordClass> {
   public async handle(request: Request<TRecordClass>): Promise<void> {
     const { values, keyChanges } = this.getRecordsToUpdate(
+      request.settings,
       request.currentRecords,
       request.newRecords,
     );
 
-    await this.updateKeys(
-      keyChanges,
-      this.instance.getPrimaryKeyName() as string,
-    );
+    await this.updateKeys(keyChanges, this.instance.getPrimaryKeyName());
 
     await this.instance.table.bulkPut(values);
   }
 
   protected getRecordsToUpdate(
+    settings: BulkSyncSettings<TRecordClass>,
     currentRecords: TRecordClass[],
     newRecords: TRecordClass[],
   ): RecordsToUpdate<TRecordClass> {
@@ -35,20 +35,24 @@ export class UpdateMiddleware<TRecordClass> extends Middleware<TRecordClass> {
     const keyChanges: (KeyChange | null)[] = [];
 
     currentRecords.forEach((currentRecord) => {
-      const newRecord = this.findEquivalentInList(currentRecord, newRecords);
+      const newRecord = this.findEquivalentInList(
+        settings,
+        currentRecord,
+        newRecords,
+      );
 
       const updatedRecord: TRecordClass = {
         ...currentRecord,
-        ...this.filterUpdateableFields(newRecord),
+        ...this.filterUpdateableFields(settings, newRecord),
       };
 
-      if (!this.shouldUpdate(currentRecord, updatedRecord)) {
+      if (!this.shouldUpdate(settings, currentRecord, updatedRecord)) {
         return;
       }
 
       values.push(updatedRecord);
 
-      keyChanges.push(this.calculateKeyChange(currentRecord, updatedRecord));
+      keyChanges.push(this.makeKeyChange(currentRecord, updatedRecord));
     });
 
     return {
@@ -58,26 +62,28 @@ export class UpdateMiddleware<TRecordClass> extends Middleware<TRecordClass> {
   }
 
   protected shouldUpdate(
+    settings: BulkSyncSettings<TRecordClass>,
     currentData: TRecordClass,
     updatedData: TRecordClass,
   ): boolean {
-    const fieldsHasDataChanged =
-      this.instance.getFieldsDataChanged() ??
-      (Object.keys(currentData as object) as Array<keyof TRecordClass>);
+    const fieldsHasDataChanged = (settings.fieldsDataChanged ??
+      Object.keys(currentData as object)) as Array<keyof TRecordClass>;
 
     return fieldsHasDataChanged.some(
       (field) => currentData[field] !== updatedData[field],
     );
   }
 
-  protected filterUpdateableFields(newData: TRecordClass | null): TRecordClass {
+  protected filterUpdateableFields(
+    settings: BulkSyncSettings<TRecordClass>,
+    newData: TRecordClass | null,
+  ): TRecordClass {
     if (!newData) {
       return {} as TRecordClass;
     }
 
-    const fieldsToUpdate =
-      this.instance.getFieldsToUpdate() ??
-      (Object.keys(newData as object) as Array<keyof TRecordClass>);
+    const fieldsToUpdate = (settings.fieldsToUpdate ??
+      Object.keys(newData as object)) as Array<keyof TRecordClass>;
 
     return fieldsToUpdate.reduce(
       (acc, field) => ({
@@ -89,29 +95,32 @@ export class UpdateMiddleware<TRecordClass> extends Middleware<TRecordClass> {
   }
 
   protected findEquivalentInList(
+    settings: BulkSyncSettings<TRecordClass>,
     originalRecord: TRecordClass,
     list: TRecordClass[],
   ): TRecordClass | null {
     return (
       list.find((listItem) =>
-        this.instance.isSameRecord(listItem, originalRecord),
+        settings.isSameRecord(listItem, originalRecord),
       ) ?? null
     );
   }
 
-  protected calculateKeyChange(
-    recordA: TRecordClass,
-    recordB: TRecordClass,
+  protected makeKeyChange(
+    recordFrom: TRecordClass,
+    recordTo: TRecordClass,
   ): KeyChange | null {
-    const primaryKeyName = this.instance.getPrimaryKeyName();
+    const keyFrom = this.instance.getPrimaryKeyValue(recordFrom);
 
-    if (recordA[primaryKeyName] === recordB[primaryKeyName]) {
+    const keyTo = this.instance.getPrimaryKeyValue(recordTo);
+
+    if (keyFrom === keyTo) {
       return null;
     }
 
     return {
-      keyBefore: recordA[primaryKeyName] as IndexableType,
-      keyAfter: recordB[primaryKeyName] as IndexableType,
+      keyFrom,
+      keyTo,
     };
   }
 
@@ -119,9 +128,9 @@ export class UpdateMiddleware<TRecordClass> extends Middleware<TRecordClass> {
     keyChanges: KeyChange[],
     primaryKeyName: string,
   ): Promise<void> {
-    for (const { keyBefore, keyAfter } of keyChanges) {
-      await this.instance.table.update(keyBefore, {
-        [primaryKeyName]: keyAfter,
+    for (const { keyFrom, keyTo } of keyChanges) {
+      await this.instance.table.update(keyFrom, {
+        [primaryKeyName]: keyTo,
       });
     }
   }
