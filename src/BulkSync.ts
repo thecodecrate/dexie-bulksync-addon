@@ -49,7 +49,9 @@ export class BulkSync<TRecordClass> {
     }
 
     if (!Array.isArray(newRecords)) {
-      throw new Error("'bulkSync' requires an array of items. Did you mean to use 'put'?");
+      throw new Error(
+        "'bulkSync' requires an array of items. Did you mean to use 'singleSync'?",
+      );
     }
   }
 

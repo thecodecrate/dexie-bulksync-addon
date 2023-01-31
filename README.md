@@ -332,5 +332,19 @@ await db.books
   .bulkSync(myUpdatedData, overriddenSettings);
 ```
 
+## SingleSync
+
+It works like the `put()` method, but uses bulkSync behind the scenes.
+
+Useful when you want to customize the `put()` behavior. It supports all bulkSync API: `middlewares`, `fieldsIsSameRecord`, `fieldsToUpdate`, etc.
+
+Example:
+
+```typescript
+await db.books
+  .where({ genre_id: 1 })
+  .singleSync(myUpdatedBook, overriddenSettings);
+```
+
 ## Conclusion
 BulkSync for Dexie makes it easy to keep your local IndexedDB data in sync with a remote dataset. Its smart update operation ensures that your database remains efficient, while its simple API makes it easy to integrate into your web application.

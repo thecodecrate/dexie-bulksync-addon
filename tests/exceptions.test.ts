@@ -22,7 +22,7 @@ describe("exceptions", () => {
         .where({ genre_id: 1 })
         .bulkSync({ title: "Book 6", genre_id: 1 } as any),
     ).rejects.toThrowError(
-      "'bulkSync' requires an array of items. Did you mean to use 'put'?",
+      "'bulkSync' requires an array of items. Did you mean to use 'singleSync'?",
     );
   });
 
@@ -33,17 +33,15 @@ describe("exceptions", () => {
         genre_id: 1,
       } as any),
     ).rejects.toThrowError(
-      "'bulkSync' requires an array of items. Did you mean to use 'put'?",
+      "'bulkSync' requires an array of items. Did you mean to use 'singleSync'?",
     );
   });
 
   it("didn't pass any argument", async () => {
     await expect(
-      db.books
-        .where({ genre_id: 1 })
-        .bulkSync(undefined as any),
+      db.books.where({ genre_id: 1 }).bulkSync(undefined as any),
     ).rejects.toThrowError(
-      "'bulkSync' requires an array of items. Did you mean to use 'put'?",
+      "'bulkSync' requires an array of items. Did you mean to use 'singleSync'?",
     );
   });
 });
