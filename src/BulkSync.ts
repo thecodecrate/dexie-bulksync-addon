@@ -40,11 +40,26 @@ export class BulkSync<TRecordClass> {
     return record[fieldName] as IndexableType;
   }
 
+  protected assertExecuteArguments(
+    currentRecords: TRecordClass[],
+    newRecords: TRecordClass[],
+  ): void {
+    if (!Array.isArray(currentRecords)) {
+      throw new Error("currentRecords must be an array");
+    }
+
+    if (!Array.isArray(newRecords)) {
+      throw new Error("'bulkSync' requires an array of items. Did you mean to use 'put'?");
+    }
+  }
+
   public async execute(
     currentRecords: TRecordClass[],
     newRecords: TRecordClass[],
     overrideSettings?: BulkSyncSettings<TRecordClass>,
   ): Promise<void> {
+    this.assertExecuteArguments(currentRecords, newRecords);
+
     const settings = new BulkSyncSettings<TRecordClass>({
       fieldsIsSameRecord: this.fieldsIsSameRecord ?? [this.getPrimaryKeyName()],
       fieldsDataChanged: this.fieldsDataChanged,
