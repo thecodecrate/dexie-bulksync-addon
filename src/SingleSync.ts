@@ -1,7 +1,7 @@
 import { Collection } from "dexie";
-import { BulkSync } from "./BulkSync";
-import { BulkSyncSettings } from "./BulkSyncSettings";
-import { collectionWhere } from "./helpers/collectionWhere";
+import { BulkSync } from "./BulkSync.js";
+import { BulkSyncSettings } from "./BulkSyncSettings.js";
+import { collectionWhere } from "./helpers/collectionWhere.js";
 
 export class SingleSync<TRecordClass> {
   constructor(public bulkSyncInstance: BulkSync<TRecordClass>) {}
@@ -15,11 +15,14 @@ export class SingleSync<TRecordClass> {
         this.bulkSyncInstance.getPrimaryKeyName(),
       ];
 
-    return fieldsIsSameRecord.reduce((acc, key) => {
-      acc[key] = (item as Record<string, any>)[key];
+    return fieldsIsSameRecord.reduce(
+      (acc: Record<string, any>, key: string) => {
+        acc[key] = (item as Record<string, any>)[key];
 
-      return acc;
-    }, {} as Record<string, any>);
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
   }
 
   public async executeOnTable(
